@@ -1,0 +1,63 @@
+---
+- name: "Add group {{ user_add_groupname }}"
+  group:
+    name: "{{ user_add_groupname }}"
+    gid: "{{ user_add_gid|default(omit) }}"
+  when: user_add_groupname is defined
+
+- name: "Add user {{ user_add_username }}"
+  user:
+    name: "{{ user_add_username }}"
+    groups: "{{ user_add_user_groups|default(omit) }}"
+    generate_ssh_key: "{{ user_add_generate_ssh_key }}"
+    uid: "{{ user_add_uid|default(omit) }}"
+    home: "{{ user_add_home|default(omit) }}"
+  when: user_add_username is defined
+
+- name: create ssh directory
+  file:
+    dest: /home/{{ user_add_username }}/.ssh
+    group: "{{ user_add_username }}"
+    owner: "{{ user_add_username }}"
+    state: directory
+    mode: 0700
+  when: authorised_keys is defined or user_add_user_ssh_key != ""
+
+- name: create authorized keys
+  copy:
+    content: ""
+    dest: /home/{{ user_add_username }}/.ssh/authorized_keys
+    group: "{{ user_add_username }}"
+    owner: "{{ user_add_username }}"
+    mode: 0700
+  when: authorised_keys is defined
+
+- name: Copy Authorized Keys
+  lineinfile:
+    dest: /home/{{ user_add_username }}/.ssh/authorized_keys
+    line: "{{ user_add_public_keys[item] }}"
+  when: authorised_keys is defined
+  with_items: "{{ authorised_keys }}"
+
+- set_fact:
+    user_add_id_rsa: "{{ user_add_private_keys[user_add_user_ssh_key] }}"
+    user_add_id_rsa_pub: "{{ user_add_public_keys[user_add_user_ssh_key] }}"
+  when: not((user_add_user_ssh_key is undefined) or (user_add_user_ssh_key is none) or (user_add_user_ssh_key|trim == ''))
+
+- name: create private key file
+  template:
+    src: id_rsa
+    dest: "/home/{{ user_add_username }}/.ssh"
+    owner: "{{ user_add_username }}"
+    group: "{{ user_add_username }}"
+    mode: 0700
+  when: not((user_add_user_ssh_key is undefined) or (user_add_user_ssh_key is none) or (user_add_user_ssh_key|trim == ''))
+
+- name: create public key file
+  template:
+    src: id_rsa.pub
+    dest: "/home/{{ user_add_username }}/.ssh"
+    owner: "{{ user_add_username }}"
+    group: "{{ user_add_username }}"
+    mode: 0700
+  when: not((user_add_user_ssh_key is undefined) or (user_add_user_ssh_key is none) or (user_add_user_ssh_key|trim == ''))

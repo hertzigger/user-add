@@ -1,0 +1,12 @@
+---
+user_add_public_keys:
+  none:
+user_add_private_keys:
+  none:
+user_add_user_groups:
+user_add_generate_ssh_key: yes
+user_add_user_ssh_key: "no"
+user_add_id_rsa:
+user_add_id_rsa_pub:
+user_add_username: default
+user_add_user_ssh_key: none
