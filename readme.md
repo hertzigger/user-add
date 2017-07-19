@@ -27,7 +27,7 @@ Add a user as a sudo user to only specific server or server groups, This will al
   vars:
     user_add_public_keys:
       jonathan: "public-key"
-    username: jon
+    username: jonathan
     user_add_user_groups: wheel
     user_add_generate_ssh_key: no
     authorised_keys:
